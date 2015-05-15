@@ -7,11 +7,19 @@ import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.yinli.randomcat.adapters.SlidePagerAdapter;
+import com.yinli.randomcat.data.CatImage;
+
+import org.parceler.Parcels;
+
+import java.util.List;
+
 
 public class SubActivity extends ActionBarActivity {
 
     private ViewPager mPager;
     private PagerAdapter mPagerAdapter;
+    private int position;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -19,10 +27,13 @@ public class SubActivity extends ActionBarActivity {
 
         Bundle extras = getIntent().getExtras();
         if (extras == null) return;
-//        List<CatImage> images = Parcels.unwrap(extras.get("images"));
+        List<CatImage> images = Parcels.unwrap(extras.getParcelable("images"));
+        position = extras.getInt("position");
 
         mPager = (ViewPager) findViewById(R.id.viewPager);
-//        mPagerAdapter = new SlidePagerAdapter(this, getSupportFragmentManager(), )
+        mPagerAdapter = new SlidePagerAdapter(this, getSupportFragmentManager(), images);
+        mPager.setAdapter(mPagerAdapter);
+        mPager.setCurrentItem(position);
     }
 
     @Override
@@ -40,7 +51,8 @@ public class SubActivity extends ActionBarActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == android.R.id.home) {
+            onBackPressed();
             return true;
         }
 

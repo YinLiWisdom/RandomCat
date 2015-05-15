@@ -51,7 +51,7 @@ public class PagerFragment extends Fragment {
                 int width = imageView.getWidth();
                 int height = imageView.getHeight();
 
-                Picasso.with(getActivity()).load(new File(mImgUrl)).resize(width, height).into(imageView);
+                Picasso.with(getActivity()).load(mImgUrl).resize(width, height).into(imageView);
                 return true;
             }
         });

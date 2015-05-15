@@ -8,11 +8,13 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v7.app.ActionBarActivity;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.TextView;
 
@@ -23,6 +25,7 @@ import com.yinli.randomcat.data.CatImage;
 import com.yinli.randomcat.utils.Typefaces;
 import com.yinli.randomcat.utils.XMLHelper;
 
+import org.parceler.Parcels;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
@@ -32,7 +35,7 @@ import java.net.URL;
 import java.util.List;
 
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends ActionBarActivity implements AdapterView.OnItemClickListener {
 
     private static final String URL = "http://thecatapi.com/api/images/get?format=xml&results_per_page=20";
     private static final String CONNERROR = "connection_error";
@@ -56,20 +59,23 @@ public class MainActivity extends ActionBarActivity {
         IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
         receiver = new NetworkReceiver();
         this.registerReceiver(receiver, filter);
-    }
-
-    public void refreshClick(View view) {
-        loadData();
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
 
         updateConnectedFlags();
         if (refresh) {
             loadData();
         }
+    }
+
+    public void refreshClick(View view) {
+        updateConnectedFlags();
+        if (refresh) {
+            loadData();
+        }
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
     }
 
     private void updateConnectedFlags() {
@@ -134,11 +140,20 @@ public class MainActivity extends ActionBarActivity {
                 GridView gridView = (GridView) findViewById(R.id.gridView);
                 GridAdapter adapter = new GridAdapter(MainActivity.this, catImages);
                 gridView.setAdapter(adapter);
+                gridView.setOnItemClickListener(MainActivity.this);
                 endLoading();
             }
         }
     }
 
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        Intent intent = new Intent(MainActivity.this, SubActivity.class);
+        intent.putExtra("position", position);
+        Parcelable list = Parcels.wrap(catImages);
+        intent.putExtra("images", list);
+        startActivity(intent);
+    }
 
     private void startLoading() {
         titanicTextView = (TitanicTextView) findViewById(R.id.titanicLoading);
@@ -202,7 +217,11 @@ public class MainActivity extends ActionBarActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_refresh) {
+            updateConnectedFlags();
+            if (refresh) {
+                loadData();
+            }
             return true;
         }
 
