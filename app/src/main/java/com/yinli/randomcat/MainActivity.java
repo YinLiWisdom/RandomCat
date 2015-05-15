@@ -188,6 +188,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     private void startLoading() {
         titanicTextView = (TitanicTextView) findViewById(R.id.titanicLoading);
         titanicTextView.setTypeface(Typefaces.get(this, "Satisfy-Regular.ttf"));
+        gridView.setVisibility(View.INVISIBLE);
         titanicTextView.setVisibility(View.VISIBLE);
         titanic = new Titanic();
         titanic.start(titanicTextView);
@@ -195,6 +196,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
 
     private void endLoading() {
         titanic.cancel();
+        gridView.setVisibility(View.VISIBLE);
         titanicTextView.setVisibility(View.INVISIBLE);
     }
 
