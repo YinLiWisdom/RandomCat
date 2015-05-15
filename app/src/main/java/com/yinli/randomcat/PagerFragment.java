@@ -11,8 +11,6 @@ import android.widget.ImageView;
 
 import com.squareup.picasso.Picasso;
 
-import java.io.File;
-
 
 /**
  * A simple {@link Fragment} subclass.
@@ -47,11 +45,12 @@ public class PagerFragment extends Fragment {
         imageView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
             @Override
             public boolean onPreDraw() {
-                imageView.getViewTreeObserver().removeOnPreDrawListener(this);
+
                 int width = imageView.getWidth();
                 int height = imageView.getHeight();
 
                 Picasso.with(getActivity()).load(mImgUrl).resize(width, height).into(imageView);
+                imageView.getViewTreeObserver().removeOnPreDrawListener(this);
                 return true;
             }
         });

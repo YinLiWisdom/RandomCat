@@ -16,6 +16,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.romainpiel.titanic.library.Titanic;
@@ -32,6 +33,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -46,31 +48,58 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     private static boolean refresh = true;
 
     private NetworkReceiver receiver = new NetworkReceiver();
-    private List<CatImage> catImages = null;
+    private List<CatImage> catImages;
     private TitanicTextView titanicTextView;
+    private GridView gridView;
+    private TextView errorText;
+    private LinearLayout errorContainer;
     private Titanic titanic;
+    private GridAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_main);
 
         // Register network broadcast receiver
         IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
         receiver = new NetworkReceiver();
         this.registerReceiver(receiver, filter);
 
+        errorContainer = (LinearLayout) findViewById(R.id.connectionErrorContainer);
+        errorText = (TextView) findViewById(R.id.errorText);
+        gridView = (GridView) findViewById(R.id.gridView);
+
+        init();
+
+        adapter = new GridAdapter(MainActivity.this, catImages);
+        gridView.setAdapter(adapter);
+        gridView.setOnItemClickListener(MainActivity.this);
+    }
+
+    private void init() {
+        catImages = (List<CatImage>) getLastCustomNonConfigurationInstance();
+        if (catImages == null) {
+            catImages = new ArrayList<>();
+            loadDataFromNetwork();
+        }
+    }
+
+    public void refreshClick(View view) {
+        loadDataFromNetwork();
+    }
+
+    private void loadDataFromNetwork() {
         updateConnectedFlags();
+        // Only allowed to refresh the page if the device has a network connection
         if (refresh) {
             loadData();
         }
     }
 
-    public void refreshClick(View view) {
-        updateConnectedFlags();
-        if (refresh) {
-            loadData();
-        }
+    @Override
+    public Object onRetainCustomNonConfigurationInstance() {
+        return catImages;
     }
 
     @Override
@@ -92,6 +121,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
 
     private void loadData() {
         if (connected) {
+            errorContainer.setVisibility(View.GONE);
             new DownloadXmlTask().execute(URL);
         } else {
             showErrorPage(CONNERROR);
@@ -99,12 +129,11 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     }
 
     private void showErrorPage(String errorType) {
-        setContentView(R.layout.activity_main_error);
-        TextView textView = (TextView) findViewById(R.id.errorText);
+        errorContainer.setVisibility(View.VISIBLE);
         if (TextUtils.equals(errorType, CONNERROR)) {
-            textView.setText(R.string.connection_error_text);
+            errorText.setText(R.string.connection_error_text);
         } else if (TextUtils.equals(errorType, XMLERROR)) {
-            textView.setText(R.string.xml_error_text);
+            errorText.setText(R.string.xml_error_text);
         }
 
     }
@@ -114,7 +143,6 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            setContentView(R.layout.activity_main);
             startLoading();
         }
 
@@ -136,14 +164,14 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
             } else if (TextUtils.equals(result, XMLERROR)) {
                 showErrorPage(XMLERROR);
             } else {
-                setContentView(R.layout.activity_main);
-                GridView gridView = (GridView) findViewById(R.id.gridView);
-                GridAdapter adapter = new GridAdapter(MainActivity.this, catImages);
-                gridView.setAdapter(adapter);
-                gridView.setOnItemClickListener(MainActivity.this);
                 endLoading();
+                updateGrid();
             }
         }
+    }
+
+    private void updateGrid() {
+        adapter.notifyDataSetChanged();
     }
 
     @Override
@@ -172,7 +200,8 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         InputStream stream = null;
         try {
             stream = downloadUrl(url);
-            catImages = new XMLHelper().parse(stream);
+            catImages.clear();
+            catImages.addAll(new XMLHelper().parse(stream));
         } finally {
             if (stream != null) {
                 stream.close();

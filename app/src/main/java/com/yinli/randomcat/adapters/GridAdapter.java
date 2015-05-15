@@ -69,8 +69,8 @@ public class GridAdapter extends BaseAdapter {
                     int width = image.getWidth();
                     int height = image.getHeight();
 
-                    Picasso.with(mContext).load(item.getImgUrl()).placeholder(R.drawable.default_thumb).error(R.drawable.default_thumb).
-                            resize(width, height).into(image);
+                    Picasso.with(mContext).load(item.getImgUrl()).resize(width, height).into(image);
+                    image.getViewTreeObserver().removeOnPreDrawListener(this);
                     return true;
                 }
             });
