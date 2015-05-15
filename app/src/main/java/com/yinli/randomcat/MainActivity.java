@@ -78,6 +78,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     }
 
     private void init() {
+        // Retrieve saved images from orientation change
         catImages = (List<CatImage>) getLastCustomNonConfigurationInstance();
         if (catImages == null) {
             catImages = new ArrayList<>();
@@ -97,6 +98,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         }
     }
 
+    // Save the downloaded images before orientation change
     @Override
     public Object onRetainCustomNonConfigurationInstance() {
         return catImages;
