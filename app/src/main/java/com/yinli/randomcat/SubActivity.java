@@ -1,17 +1,28 @@
 package com.yinli.randomcat;
 
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v4.view.PagerAdapter;
+import android.support.v4.view.ViewPager;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
 
 public class SubActivity extends ActionBarActivity {
 
+    private ViewPager mPager;
+    private PagerAdapter mPagerAdapter;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sub);
+
+        Bundle extras = getIntent().getExtras();
+        if (extras == null) return;
+//        List<CatImage> images = Parcels.unwrap(extras.get("images"));
+
+        mPager = (ViewPager) findViewById(R.id.viewPager);
+//        mPagerAdapter = new SlidePagerAdapter(this, getSupportFragmentManager(), )
     }
 
     @Override
